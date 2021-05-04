@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>EPAM.Deltix.ZStd</RootNamespace>
+		<RepositoryType>git</RepositoryType>
+		<PackageId>Zstandard</PackageId>
+		<Version>1.0.2</Version>
+		<Authors>Deltix Inc.</Authors>
+		<Company>Deltix Inc.</Company>
+		<Copyright>Copyright (C) 2018-2020, Deltix Inc.</Copyright>
+		<RepositoryUrl>https://github.com/deltixlab/Zstandard.git</RepositoryUrl>
+		<Description>Zstandard - Fast real-time compression algorithm.</Description>
+		<PackageProjectUrl>https://github.com/epam/Zstandard</PackageProjectUrl>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<OutputPath>..\bin\$(Configuration)</OutputPath>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DefineConstants>TRACE;DEBUG;NETSTANDARD1_1;ZSTDPUBLIC</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <DefineConstants>TRACE;RELEASE;NETSTANDARD1_1;ZSTDPUBLIC</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="LICENSE" />
+	</ItemGroup>
+</Project>
