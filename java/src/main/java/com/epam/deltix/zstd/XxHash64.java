@@ -16,10 +16,10 @@ package com.epam.deltix.zstd;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static java.lang.Long.rotateLeft;
-import static java.lang.Math.min;
 import static com.epam.deltix.zstd.JvmUtils.unsafe;
 import static com.epam.deltix.zstd.Preconditions.checkPositionIndexes;
+import static java.lang.Long.rotateLeft;
+import static java.lang.Math.min;
 import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
 
 public final class XxHash64 {
@@ -48,7 +48,7 @@ public final class XxHash64 {
         this(DEFAULT_SEED);
     }
 
-    public XxHash64(long seed) {
+    public XxHash64(final long seed) {
         this.seed = seed;
         this.v1 = seed + PRIME64_1 + PRIME64_2;
         this.v2 = seed + PRIME64_2;
@@ -56,21 +56,21 @@ public final class XxHash64 {
         this.v4 = seed - PRIME64_1;
     }
 
-    public XxHash64 update(byte[] data) {
+    public XxHash64 update(final byte[] data) {
         return update(data, 0, data.length);
     }
 
-    public XxHash64 update(byte[] data, int offset, int length) {
+    public XxHash64 update(final byte[] data, final int offset, final int length) {
         checkPositionIndexes(offset, offset + length, data.length);
         updateHash(data, ARRAY_BYTE_BASE_OFFSET + offset, length);
         return this;
     }
 
-    public XxHash64 update(Object dataBase, long dataAddress, int dataSize) {
+    public XxHash64 update(final Object dataBase, final long dataAddress, final int dataSize) {
         return update(dataBase, dataAddress, dataSize, 0, dataSize);
     }
 
-    public XxHash64 update(Object dataBase, long dataAddress, int dataSize, int offset, int length) {
+    public XxHash64 update(final Object dataBase, final long dataAddress, final int dataSize, final int offset, final int length) {
         checkPositionIndexes(0, offset + length, dataSize);
         updateHash(dataBase, dataAddress + offset, length);
         return this;
@@ -100,9 +100,9 @@ public final class XxHash64 {
         return hash;
     }
 
-    private void updateHash(Object base, long address, int length) {
+    private void updateHash(final Object base, long address, int length) {
         if (bufferSize > 0) {
-            int available = min(32 - bufferSize, length);
+            final int available = min(32 - bufferSize, length);
 
             unsafe.copyMemory(base, address, buffer, BUFFER_ADDRESS + bufferSize, available);
 
@@ -117,7 +117,7 @@ public final class XxHash64 {
         }
 
         if (length >= 32) {
-            int index = updateBody(base, address, length);
+            final int index = updateBody(base, address, length);
             address += index;
             length -= index;
         }
@@ -128,7 +128,7 @@ public final class XxHash64 {
         }
     }
 
-    private int updateBody(Object base, long address, int length) {
+    private int updateBody(final Object base, long address, final int length) {
         int remaining = length;
         while (remaining >= 32) {
             v1 = mix(v1, unsafe.getLong(base, address));
@@ -140,12 +140,12 @@ public final class XxHash64 {
             remaining -= 32;
         }
 
-        int index = length - remaining;
+        final int index = length - remaining;
         bodyLength += index;
         return index;
     }
 
-    public static long hash(long value) {
+    public static long hash(final long value) {
         long hash = DEFAULT_SEED + PRIME64_5 + SizeOf.SIZE_OF_LONG;
         hash = updateTail(hash, value);
         hash = finalShuffle(hash);
@@ -153,17 +153,17 @@ public final class XxHash64 {
         return hash;
     }
 
-    public static long hash(InputStream in)
+    public static long hash(final InputStream in)
             throws IOException {
         return hash(DEFAULT_SEED, in);
     }
 
-    public static long hash(long seed, InputStream in)
+    public static long hash(final long seed, final InputStream in)
             throws IOException {
-        XxHash64 hash = new XxHash64(seed);
-        byte[] buffer = new byte[8192];
+        final XxHash64 hash = new XxHash64(seed);
+        final byte[] buffer = new byte[8192];
         while (true) {
-            int length = in.read(buffer);
+            final int length = in.read(buffer);
             if (length == -1) {
                 break;
             }
@@ -172,22 +172,22 @@ public final class XxHash64 {
         return hash.hash();
     }
 
-    public static long hash(Object dataBase, long dataAddress, int dataSize) {
+    public static long hash(final Object dataBase, final long dataAddress, final int dataSize) {
         return hash(dataBase, dataAddress, dataSize, 0, dataSize);
     }
 
-    public static long hash(long seed, Object dataBase, long dataAddress, int dataSize) {
+    public static long hash(final long seed, final Object dataBase, final long dataAddress, final int dataSize) {
         return hash(seed, dataBase, dataAddress, dataSize, 0, dataSize);
     }
 
-    public static long hash(Object dataBase, long dataAddress, int dataSize, int offset, int length) {
+    public static long hash(final Object dataBase, final long dataAddress, final int dataSize, final int offset, final int length) {
         return hash(DEFAULT_SEED, dataBase, dataAddress, dataSize, offset, length);
     }
 
-    public static long hash(long seed, Object dataBase, long dataAddress, int dataSize, int offset, int length) {
+    public static long hash(final long seed, final Object dataBase, final long dataAddress, final int dataSize, final int offset, final int length) {
         checkPositionIndexes(0, offset + length, dataSize);
 
-        Object base = dataBase;
+        final Object base = dataBase;
         final long address = dataAddress + offset;
 
         long hash;
@@ -201,12 +201,12 @@ public final class XxHash64 {
 
         // round to the closest 32 byte boundary
         // this is the point up to which updateBody() processed
-        int index = length & 0xFFFFFFE0;
+        final int index = length & 0xFFFFFFE0;
 
         return updateTail(hash, base, address, index, length);
     }
 
-    private static long updateTail(long hash, Object base, long address, int index, int length) {
+    private static long updateTail(long hash, final Object base, final long address, int index, final int length) {
         while (index <= length - 8) {
             hash = updateTail(hash, unsafe.getLong(base, address + index));
             index += 8;
@@ -227,7 +227,7 @@ public final class XxHash64 {
         return hash;
     }
 
-    private static long updateBody(long seed, Object base, long address, int length) {
+    private static long updateBody(final long seed, final Object base, long address, final int length) {
         long v1 = seed + PRIME64_1 + PRIME64_2;
         long v2 = seed + PRIME64_2;
         long v3 = seed;
@@ -254,29 +254,29 @@ public final class XxHash64 {
         return hash;
     }
 
-    private static long mix(long current, long value) {
+    private static long mix(final long current, final long value) {
         return rotateLeft(current + value * PRIME64_2, 31) * PRIME64_1;
     }
 
-    private static long update(long hash, long value) {
-        long temp = hash ^ mix(0, value);
+    private static long update(final long hash, final long value) {
+        final long temp = hash ^ mix(0, value);
         return temp * PRIME64_1 + PRIME64_4;
     }
 
-    private static long updateTail(long hash, long value) {
-        long temp = hash ^ mix(0, value);
+    private static long updateTail(final long hash, final long value) {
+        final long temp = hash ^ mix(0, value);
         return rotateLeft(temp, 27) * PRIME64_1 + PRIME64_4;
     }
 
-    private static long updateTail(long hash, int value) {
-        long unsigned = value & 0xFFFF_FFFFL;
-        long temp = hash ^ (unsigned * PRIME64_1);
+    private static long updateTail(final long hash, final int value) {
+        final long unsigned = value & 0xFFFF_FFFFL;
+        final long temp = hash ^ (unsigned * PRIME64_1);
         return rotateLeft(temp, 23) * PRIME64_2 + PRIME64_3;
     }
 
-    private static long updateTail(long hash, byte value) {
-        int unsigned = value & 0xFF;
-        long temp = hash ^ (unsigned * PRIME64_5);
+    private static long updateTail(final long hash, final byte value) {
+        final int unsigned = value & 0xFF;
+        final long temp = hash ^ (unsigned * PRIME64_5);
         return rotateLeft(temp, 11) * PRIME64_1;
     }
 

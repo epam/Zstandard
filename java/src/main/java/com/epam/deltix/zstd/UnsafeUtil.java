@@ -23,34 +23,35 @@ final class UnsafeUtil {
     public static final Unsafe UNSAFE;
     private static final Field ADDRESS_ACCESSOR;
 
-    private UnsafeUtil() {}
+    private UnsafeUtil() {
+    }
 
     static {
-        ByteOrder order = ByteOrder.nativeOrder();
+        final ByteOrder order = ByteOrder.nativeOrder();
         if (!order.equals(ByteOrder.LITTLE_ENDIAN)) {
             throw new RuntimeException(String.format("Zstandard requires a little endian platform (found %s)", order));
         }
         try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            final Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafe.setAccessible(true);
             UNSAFE = (Unsafe) theUnsafe.get(null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
 
         try {
-            Field field = Buffer.class.getDeclaredField("address");
+            final Field field = Buffer.class.getDeclaredField("address");
             field.setAccessible(true);
             ADDRESS_ACCESSOR = field;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static long getAddress(Buffer buffer) {
+    public static long getAddress(final Buffer buffer) {
         try {
             return (long) ADDRESS_ACCESSOR.get(buffer);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

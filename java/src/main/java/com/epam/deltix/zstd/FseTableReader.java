@@ -24,7 +24,7 @@ class FseTableReader {
     private final short[] nextSymbol = new short[FSE_MAX_SYMBOL_VALUE + 1];
     private final short[] normalizedCounters = new short[FSE_MAX_SYMBOL_VALUE + 1];
 
-    public int readFseTable(FiniteStateEntropy.Table table, Object inputBase, long inputAddress, long inputLimit, int maxSymbol, int maxTableLog) {
+    public int readFseTable(final FiniteStateEntropy.Table table, final Object inputBase, final long inputAddress, final long inputLimit, int maxSymbol, final int maxTableLog) {
         // read table headers
         long input = inputAddress;
         verify(inputLimit - inputAddress >= 4, input, "Not enough input bytes");
@@ -35,7 +35,7 @@ class FseTableReader {
 
         int bitStream = UNSAFE.getInt(inputBase, input);
 
-        int tableLog = (bitStream & 0xF) + FSE_MIN_TABLE_LOG;
+        final int tableLog = (bitStream & 0xF) + FSE_MIN_TABLE_LOG;
 
         int numberOfBits = tableLog + 1;
         bitStream >>>= 4;
@@ -82,7 +82,7 @@ class FseTableReader {
                 }
             }
 
-            short max = (short) ((2 * threshold - 1) - remaining);
+            final short max = (short) ((2 * threshold - 1) - remaining);
             short count;
 
             if ((bitStream & (threshold - 1)) < max) {
@@ -123,8 +123,8 @@ class FseTableReader {
         input += (bitCount + 7) >> 3;
 
         // populate decoding table
-        int symbolCount = maxSymbol + 1;
-        int tableSize = 1 << tableLog;
+        final int symbolCount = maxSymbol + 1;
+        final int tableSize = 1 << tableLog;
         int highThreshold = tableSize - 1;
 
         table.log2Size = tableLog;
@@ -139,8 +139,8 @@ class FseTableReader {
         }
 
         // spread symbols
-        int tableMask = tableSize - 1;
-        int step = (tableSize >>> 1) + (tableSize >>> 3) + 3;
+        final int tableMask = tableSize - 1;
+        final int step = (tableSize >>> 1) + (tableSize >>> 3) + 3;
         int position = 0;
         for (byte symbol = 0; symbol < symbolCount; symbol++) {
             for (int i = 0; i < normalizedCounters[symbol]; i++) {
@@ -156,8 +156,8 @@ class FseTableReader {
         verify(position == 0, input, "Input is corrupted");
 
         for (int i = 0; i < tableSize; i++) {
-            byte symbol = table.symbol[i];
-            short nextState = nextSymbol[symbol]++;
+            final byte symbol = table.symbol[i];
+            final short nextState = nextSymbol[symbol]++;
             table.numberOfBits[i] = (byte) (tableLog - highestBit(nextState));
             table.newState[i] = (short) ((nextState << table.numberOfBits[i]) - tableSize);
         }
@@ -165,7 +165,7 @@ class FseTableReader {
         return (int) (input - inputAddress);
     }
 
-    public static void buildRleTable(FiniteStateEntropy.Table table, byte value) {
+    public static void buildRleTable(final FiniteStateEntropy.Table table, final byte value) {
         table.log2Size = 0;
         table.symbol[0] = value;
         table.newState[0] = 0;

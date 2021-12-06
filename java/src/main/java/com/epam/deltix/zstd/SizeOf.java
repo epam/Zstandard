@@ -23,75 +23,75 @@ public final class SizeOf {
     public static final byte SIZE_OF_FLOAT = 4;
     public static final byte SIZE_OF_DOUBLE = 8;
 
-    public static long sizeOf(boolean[] array) {
+    public static long sizeOf(final boolean[] array) {
         return (array == null) ? 0 : sizeOfBooleanArray(array.length);
     }
 
-    public static long sizeOf(byte[] array) {
+    public static long sizeOf(final byte[] array) {
         return (array == null) ? 0 : sizeOfByteArray(array.length);
     }
 
-    public static long sizeOf(short[] array) {
+    public static long sizeOf(final short[] array) {
         return (array == null) ? 0 : sizeOfShortArray(array.length);
     }
 
-    public static long sizeOf(char[] array) {
+    public static long sizeOf(final char[] array) {
         return (array == null) ? 0 : sizeOfCharArray(array.length);
     }
 
-    public static long sizeOf(int[] array) {
+    public static long sizeOf(final int[] array) {
         return (array == null) ? 0 : sizeOfIntArray(array.length);
     }
 
-    public static long sizeOf(long[] array) {
+    public static long sizeOf(final long[] array) {
         return (array == null) ? 0 : sizeOfLongArray(array.length);
     }
 
-    public static long sizeOf(float[] array) {
+    public static long sizeOf(final float[] array) {
         return (array == null) ? 0 : sizeOfFloatArray(array.length);
     }
 
-    public static long sizeOf(double[] array) {
+    public static long sizeOf(final double[] array) {
         return (array == null) ? 0 : sizeOfDoubleArray(array.length);
     }
 
-    public static long sizeOf(Object[] array) {
+    public static long sizeOf(final Object[] array) {
         return (array == null) ? 0 : sizeOfObjectArray(array.length);
     }
 
-    public static long sizeOfBooleanArray(int length) {
+    public static long sizeOfBooleanArray(final int length) {
         return ARRAY_BOOLEAN_BASE_OFFSET + (((long) ARRAY_BOOLEAN_INDEX_SCALE) * length);
     }
 
-    public static long sizeOfByteArray(int length) {
+    public static long sizeOfByteArray(final int length) {
         return ARRAY_BYTE_BASE_OFFSET + (((long) ARRAY_BYTE_INDEX_SCALE) * length);
     }
 
-    public static long sizeOfShortArray(int length) {
+    public static long sizeOfShortArray(final int length) {
         return ARRAY_SHORT_BASE_OFFSET + (((long) ARRAY_SHORT_INDEX_SCALE) * length);
     }
 
-    public static long sizeOfCharArray(int length) {
+    public static long sizeOfCharArray(final int length) {
         return ARRAY_CHAR_BASE_OFFSET + (((long) ARRAY_CHAR_INDEX_SCALE) * length);
     }
 
-    public static long sizeOfIntArray(int length) {
+    public static long sizeOfIntArray(final int length) {
         return ARRAY_INT_BASE_OFFSET + (((long) ARRAY_INT_INDEX_SCALE) * length);
     }
 
-    public static long sizeOfLongArray(int length) {
+    public static long sizeOfLongArray(final int length) {
         return ARRAY_LONG_BASE_OFFSET + (((long) ARRAY_LONG_INDEX_SCALE) * length);
     }
 
-    public static long sizeOfFloatArray(int length) {
+    public static long sizeOfFloatArray(final int length) {
         return ARRAY_FLOAT_BASE_OFFSET + (((long) ARRAY_FLOAT_INDEX_SCALE) * length);
     }
 
-    public static long sizeOfDoubleArray(int length) {
+    public static long sizeOfDoubleArray(final int length) {
         return ARRAY_DOUBLE_BASE_OFFSET + (((long) ARRAY_DOUBLE_INDEX_SCALE) * length);
     }
 
-    public static long sizeOfObjectArray(int length) {
+    public static long sizeOfObjectArray(final int length) {
         return ARRAY_OBJECT_BASE_OFFSET + (((long) ARRAY_OBJECT_INDEX_SCALE) * length);
     }
 

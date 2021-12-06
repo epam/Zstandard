@@ -34,7 +34,7 @@ final class JvmUtils {
     static {
         try {
             // fetch theUnsafe object
-            Field field = Unsafe.class.getDeclaredField("theUnsafe");
+            final Field field = Unsafe.class.getDeclaredField("theUnsafe");
             field.setAccessible(true);
             unsafe = (Unsafe) field.get(null);
             if (unsafe == null) {
@@ -51,29 +51,29 @@ final class JvmUtils {
             assertArrayIndexScale("Double", ARRAY_DOUBLE_INDEX_SCALE, 8);
 
             // fetch a method handle for the hidden constructor for DirectByteBuffer
-            Class<?> directByteBufferClass = ClassLoader.getSystemClassLoader().loadClass("java.nio.DirectByteBuffer");
-            Constructor<?> constructor = directByteBufferClass.getDeclaredConstructor(long.class, int.class, Object.class);
+            final Class<?> directByteBufferClass = ClassLoader.getSystemClassLoader().loadClass("java.nio.DirectByteBuffer");
+            final Constructor<?> constructor = directByteBufferClass.getDeclaredConstructor(long.class, int.class, Object.class);
             constructor.setAccessible(true);
             newByteBuffer = MethodHandles.lookup().unreflectConstructor(constructor)
                     .asType(MethodType.methodType(ByteBuffer.class, long.class, int.class, Object.class));
 
             ADDRESS_ACCESSOR = Buffer.class.getDeclaredField("address");
             ADDRESS_ACCESSOR.setAccessible(true);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void assertArrayIndexScale(final String name, int actualIndexScale, int expectedIndexScale) {
+    private static void assertArrayIndexScale(final String name, final int actualIndexScale, final int expectedIndexScale) {
         if (actualIndexScale != expectedIndexScale) {
             throw new IllegalStateException(name + " array index scale must be " + expectedIndexScale + ", but is " + actualIndexScale);
         }
     }
 
-    public static long getAddress(Buffer buffer) {
+    public static long getAddress(final Buffer buffer) {
         try {
             return (long) ADDRESS_ACCESSOR.get(buffer);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

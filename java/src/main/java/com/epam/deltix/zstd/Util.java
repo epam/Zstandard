@@ -17,25 +17,25 @@ class Util {
     private Util() {
     }
 
-    public static int highestBit(int value) {
+    public static int highestBit(final int value) {
         return 31 - Integer.numberOfLeadingZeros(value);
     }
 
-    public static boolean isPowerOf2(int value) {
+    public static boolean isPowerOf2(final int value) {
         return (value & (value - 1)) == 0;
     }
 
-    public static int mask(int bits) {
+    public static int mask(final int bits) {
         return (1 << bits) - 1;
     }
 
-    public static void verify(boolean condition, long offset, String reason) {
+    public static void verify(final boolean condition, final long offset, final String reason) {
         if (!condition) {
             throw new RuntimeException(reason + ": offset=" + offset);
         }
     }
 
-    public static RuntimeException fail(long offset, String reason) {
+    public static RuntimeException fail(final long offset, final String reason) {
         throw new RuntimeException(reason + ": offset=" + offset);
     }
 }

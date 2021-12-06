@@ -22,17 +22,17 @@ final class Preconditions {
     private Preconditions() {
     }
 
-    public static void checkArgument(boolean expression, String errorMessage) {
+    public static void checkArgument(final boolean expression, final String errorMessage) {
         if (!expression) {
             throw new IllegalArgumentException(errorMessage);
         }
     }
 
-    public static int checkPositionIndex(int index, int size) {
+    public static int checkPositionIndex(final int index, final int size) {
         return checkPositionIndex(index, size, "index");
     }
 
-    public static int checkPositionIndex(int index, int size, String desc) {
+    public static int checkPositionIndex(final int index, final int size, final String desc) {
         // Carefully optimized for execution by hotspot (explanatory comment above)
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException(badPositionIndex(index, size, desc));
@@ -40,11 +40,11 @@ final class Preconditions {
         return index;
     }
 
-    public static long checkPositionIndex(long index, long size) {
+    public static long checkPositionIndex(final long index, final long size) {
         return checkPositionIndex(index, size, "index");
     }
 
-    public static long checkPositionIndex(long index, long size, String desc) {
+    public static long checkPositionIndex(final long index, final long size, final String desc) {
         // Carefully optimized for execution by hotspot (explanatory comment above)
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException(badPositionIndex(index, size, desc));
@@ -52,7 +52,7 @@ final class Preconditions {
         return index;
     }
 
-    private static String badPositionIndex(long index, long size, String desc) {
+    private static String badPositionIndex(final long index, final long size, final String desc) {
         if (index < 0) {
             return format("%s (%s) must not be negative", desc, index);
         } else if (size < 0) {
@@ -62,14 +62,14 @@ final class Preconditions {
         }
     }
 
-    public static void checkPositionIndexes(int start, int end, int size) {
+    public static void checkPositionIndexes(final int start, final int end, final int size) {
         // Carefully optimized for execution by hotspot (explanatory comment above)
         if (start < 0 || end < start || end > size) {
             throw new IndexOutOfBoundsException(badPositionIndexes(start, end, size));
         }
     }
 
-    private static String badPositionIndexes(int start, int end, int size) {
+    private static String badPositionIndexes(final int start, final int end, final int size) {
         if (start < 0 || start > size) {
             return badPositionIndex(start, size, "start index");
         }
@@ -80,7 +80,7 @@ final class Preconditions {
         return format("end index (%s) must not be less than start index (%s)", end, start);
     }
 
-    public static void verify(boolean condition) {
+    public static void verify(final boolean condition) {
         if (!condition) {
             throw new AssertionError();
         }
