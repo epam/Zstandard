@@ -13,11 +13,12 @@
  */
 package com.epam.deltix.zstd;
 
+import java.nio.ByteBuffer;
+
 import static com.epam.deltix.zstd.BitStream.peekBits;
 import static com.epam.deltix.zstd.FseTableReader.FSE_MAX_SYMBOL_VALUE;
 import static com.epam.deltix.zstd.Util.verify;
 import static com.epam.deltix.zstd.ZstdFrameDecompressor.SIZE_OF_INT;
-import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
 
 class FiniteStateEntropy {
     private static final int MAX_TABLE_LOG = 12;
@@ -29,21 +30,21 @@ class FiniteStateEntropy {
         table = new FiniteStateEntropy.Table(maxLog);
     }
 
-    public int decompress(final Object inputBase, final long inputAddress, final long inputLimit, final byte[] weights) {
-        long input = inputAddress;
+    public int decompress(final ByteBuffer inputBase, final int inputAddress, final int inputLimit, final byte[] weights) {
+        int input = inputAddress;
         input += reader.readFseTable(table, inputBase, input, inputLimit, FSE_MAX_SYMBOL_VALUE, MAX_TABLE_LOG);
 
-        final Object outputBase = weights;
-        final long outputAddress = ARRAY_BYTE_BASE_OFFSET;
+        final ByteBuffer outputBase = ByteBuffer.wrap(weights);
+        final int outputAddress = 0;
         final long outputLimit = outputAddress + weights.length;
 
-        long output = outputAddress;
+        int output = outputAddress;
 
         // initialize bit stream
         final BitStream.Initializer initializer = new BitStream.Initializer(inputBase, input, inputLimit);
         initializer.initialize();
         int bitsConsumed = initializer.getBitsConsumed();
-        long currentAddress = initializer.getCurrentAddress();
+        int currentAddress = initializer.getCurrentAddress();
         long bits = initializer.getBits();
 
         // initialize first FSE stream

@@ -13,6 +13,8 @@
  */
 package com.epam.deltix.zstd;
 
+import java.nio.ByteBuffer;
+
 import static com.epam.deltix.zstd.Util.highestBit;
 import static com.epam.deltix.zstd.Util.verify;
 
@@ -23,9 +25,9 @@ class FseTableReader {
     private final short[] nextSymbol = new short[FSE_MAX_SYMBOL_VALUE + 1];
     private final short[] normalizedCounters = new short[FSE_MAX_SYMBOL_VALUE + 1];
 
-    public int readFseTable(final FiniteStateEntropy.Table table, final Object inputBase, final long inputAddress, final long inputLimit, int maxSymbol, final int maxTableLog) {
+    public int readFseTable(final FiniteStateEntropy.Table table, final ByteBuffer inputBase, final int inputAddress, final int inputLimit, int maxSymbol, final int maxTableLog) {
         // read table headers
-        long input = inputAddress;
+        int input = inputAddress;
         verify(inputLimit - inputAddress >= 4, input, "Not enough input bytes");
 
         int threshold;

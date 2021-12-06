@@ -20,7 +20,6 @@ import static com.epam.deltix.zstd.JvmUtils.unsafe;
 import static com.epam.deltix.zstd.Preconditions.checkPositionIndexes;
 import static java.lang.Long.rotateLeft;
 import static java.lang.Math.min;
-import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
 
 public final class XxHash64 {
     private static final long PRIME64_1 = 0x9E3779B185EBCA87L;
@@ -33,7 +32,7 @@ public final class XxHash64 {
 
     private final long seed;
 
-    private static final long BUFFER_ADDRESS = ARRAY_BYTE_BASE_OFFSET;
+    private static final long BUFFER_ADDRESS = 0;
     private final byte[] buffer = new byte[32];
     private int bufferSize;
 
@@ -62,7 +61,7 @@ public final class XxHash64 {
 
     public XxHash64 update(final byte[] data, final int offset, final int length) {
         checkPositionIndexes(offset, offset + length, data.length);
-        updateHash(data, ARRAY_BYTE_BASE_OFFSET + offset, length);
+        updateHash(data, offset, length);
         return this;
     }
 

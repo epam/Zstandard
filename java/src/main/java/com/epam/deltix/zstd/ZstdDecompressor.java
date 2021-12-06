@@ -13,19 +13,15 @@
  */
 package com.epam.deltix.zstd;
 
-import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
+import java.nio.ByteBuffer;
 
 public class ZstdDecompressor {
     private final ZstdFrameDecompressor decompressor = new ZstdFrameDecompressor();
 
-    public int decompress(final byte[] input, final int inputOffset, final int inputLength, final byte[] output, final int outputOffset, final int maxOutputLength)
-            throws RuntimeException {
-        final long inputAddress = ARRAY_BYTE_BASE_OFFSET + inputOffset;
-        final long inputLimit = inputAddress + inputLength;
-        final long outputAddress = ARRAY_BYTE_BASE_OFFSET + outputOffset;
-        final long outputLimit = outputAddress + maxOutputLength;
-
-        return decompressor.decompress(input, inputAddress, inputLimit, output, outputAddress, outputLimit);
+    public int decompress(final byte[] input, final int inputOffset, final int inputLength, final byte[] output, final int outputOffset, final int maxOutputLength) {
+        return decompressor.decompress(
+                ByteBuffer.wrap(input), inputOffset, inputOffset + inputLength,
+                ByteBuffer.wrap(output), outputOffset, outputOffset + maxOutputLength);
     }
 
 //    public void decompress(final ByteBuffer input, final ByteBuffer output)
@@ -40,8 +36,8 @@ public class ZstdDecompressor {
 //            inputLimit = address + input.limit();
 //        } else if (input.hasArray()) {
 //            inputBase = input.array();
-//            inputAddress = ARRAY_BYTE_BASE_OFFSET + input.arrayOffset() + input.position();
-//            inputLimit = ARRAY_BYTE_BASE_OFFSET + input.arrayOffset() + input.limit();
+//            inputAddress = input.arrayOffset() + input.position();
+//            inputLimit = input.arrayOffset() + input.limit();
 //        } else {
 //            throw new IllegalArgumentException("Unsupported input ByteBuffer implementation " + input.getClass().getName());
 //        }
@@ -56,8 +52,8 @@ public class ZstdDecompressor {
 //            outputLimit = address + output.limit();
 //        } else if (output.hasArray()) {
 //            outputBase = output.array();
-//            outputAddress = ARRAY_BYTE_BASE_OFFSET + output.arrayOffset() + output.position();
-//            outputLimit = ARRAY_BYTE_BASE_OFFSET + output.arrayOffset() + output.limit();
+//            outputAddress = output.arrayOffset() + output.position();
+//            outputLimit = output.arrayOffset() + output.limit();
 //        } else {
 //            throw new IllegalArgumentException("Unsupported output ByteBuffer implementation " + output.getClass().getName());
 //        }
@@ -75,7 +71,6 @@ public class ZstdDecompressor {
 //    }
 
     public static long getDecompressedSize(final byte[] input, final int offset, final int length) {
-        final int baseAddress = ARRAY_BYTE_BASE_OFFSET + offset;
-        return ZstdFrameDecompressor.getDecompressedSize(input, baseAddress, baseAddress + length);
+        return ZstdFrameDecompressor.getDecompressedSize(ByteBuffer.wrap(input), offset, offset + length);
     }
 }

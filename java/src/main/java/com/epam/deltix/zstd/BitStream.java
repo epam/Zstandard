@@ -89,7 +89,7 @@ class BitStream {
             return bits;
         }
 
-        public long getCurrentAddress() {
+        public int getCurrentAddress() {
             return currentAddress;
         }
 
@@ -138,7 +138,7 @@ class BitStream {
             return bits;
         }
 
-        public long getCurrentAddress() {
+        public int getCurrentAddress() {
             return currentAddress;
         }
 
