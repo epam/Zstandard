@@ -17,7 +17,6 @@ import java.util.Arrays;
 
 import static com.epam.deltix.zstd.BitStream.isEndOfStream;
 import static com.epam.deltix.zstd.BitStream.peekBitsFast;
-import static com.epam.deltix.zstd.UnsafeUtil.UNSAFE;
 import static com.epam.deltix.zstd.Util.isPowerOf2;
 import static com.epam.deltix.zstd.Util.verify;
 import static com.epam.deltix.zstd.ZstdFrameDecompressor.SIZE_OF_INT;
@@ -48,7 +47,7 @@ class Huffman {
 
         // read table header
         verify(size > 0, input, "Not enough input bytes");
-        int inputSize = UNSAFE.getByte(inputBase, input++) & 0xFF;
+        int inputSize = inputBase.get(input++) & 0xFF;
 
         final int outputSize;
         if (inputSize >= 128) {
@@ -59,7 +58,7 @@ class Huffman {
             verify(outputSize <= MAX_SYMBOL + 1, input, "Input is corrupted");
 
             for (int i = 0; i < outputSize; i += 2) {
-                final int value = UNSAFE.getByte(inputBase, input + i / 2) & 0xFF;
+                final int value = inputBase.get(input + i / 2) & 0xFF;
                 weights[i] = (byte) (value >>> 4);
                 weights[i + 1] = (byte) (value & 0b1111);
             }
@@ -155,9 +154,9 @@ class Huffman {
         verify(inputLimit - inputAddress >= 10, inputAddress, "Input is corrupted"); // jump table + 1 byte per stream
 
         final long start1 = inputAddress + 3 * SIZE_OF_SHORT; // for the shorts we read below
-        final long start2 = start1 + (UNSAFE.getShort(inputBase, inputAddress) & 0xFFFF);
-        final long start3 = start2 + (UNSAFE.getShort(inputBase, inputAddress + 2) & 0xFFFF);
-        final long start4 = start3 + (UNSAFE.getShort(inputBase, inputAddress + 4) & 0xFFFF);
+        final long start2 = start1 + (inputBase.getShort(inputAddress) & 0xFFFF);
+        final long start3 = start2 + (inputBase.getShort(inputAddress + 2) & 0xFFFF);
+        final long start4 = start3 + (inputBase.getShort(inputAddress + 4) & 0xFFFF);
 
         BitStream.Initializer initializer = new BitStream.Initializer(inputBase, start1, start2);
         initializer.initialize();
@@ -302,7 +301,7 @@ class Huffman {
 
     private static int decodeSymbol(final Object outputBase, final long outputAddress, final long bitContainer, final int bitsConsumed, final int tableLog, final byte[] numbersOfBits, final byte[] symbols) {
         final int value = (int) peekBitsFast(bitsConsumed, bitContainer, tableLog);
-        UNSAFE.putByte(outputBase, outputAddress, symbols[value]);
+        outputBase.put(outputAddress, symbols[value]);
         return bitsConsumed + numbersOfBits[value];
     }
 }

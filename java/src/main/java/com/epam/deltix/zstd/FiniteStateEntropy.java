@@ -15,7 +15,6 @@ package com.epam.deltix.zstd;
 
 import static com.epam.deltix.zstd.BitStream.peekBits;
 import static com.epam.deltix.zstd.FseTableReader.FSE_MAX_SYMBOL_VALUE;
-import static com.epam.deltix.zstd.UnsafeUtil.UNSAFE;
 import static com.epam.deltix.zstd.Util.verify;
 import static com.epam.deltix.zstd.ZstdFrameDecompressor.SIZE_OF_INT;
 import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
@@ -75,22 +74,22 @@ class FiniteStateEntropy {
         while (output <= outputLimit - 4) {
             int numberOfBits;
 
-            UNSAFE.putByte(outputBase, output, symbols[state1]);
+            outputBase.put(output, symbols[state1]);
             numberOfBits = numbersOfBits[state1];
             state1 = (int) (newStates[state1] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
 
-            UNSAFE.putByte(outputBase, output + 1, symbols[state2]);
+            outputBase.put(output + 1, symbols[state2]);
             numberOfBits = numbersOfBits[state2];
             state2 = (int) (newStates[state2] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
 
-            UNSAFE.putByte(outputBase, output + 2, symbols[state1]);
+            outputBase.put(output + 2, symbols[state1]);
             numberOfBits = numbersOfBits[state1];
             state1 = (int) (newStates[state1] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
 
-            UNSAFE.putByte(outputBase, output + 3, symbols[state2]);
+            outputBase.put(output + 3, symbols[state2]);
             numberOfBits = numbersOfBits[state2];
             state2 = (int) (newStates[state2] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
@@ -109,7 +108,7 @@ class FiniteStateEntropy {
 
         while (true) {
             verify(output <= outputLimit - 2, input, "Output buffer is too small");
-            UNSAFE.putByte(outputBase, output++, symbols[state1]);
+            outputBase.put(output++, symbols[state1]);
             final int numberOfBits = numbersOfBits[state1];
             state1 = (int) (newStates[state1] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
@@ -121,12 +120,12 @@ class FiniteStateEntropy {
             currentAddress = loader.getCurrentAddress();
 
             if (loader.isOverflow()) {
-                UNSAFE.putByte(outputBase, output++, symbols[state2]);
+                outputBase.put(output++, symbols[state2]);
                 break;
             }
 
             verify(output <= outputLimit - 2, input, "Output buffer is too small");
-            UNSAFE.putByte(outputBase, output++, symbols[state2]);
+            outputBase.put(output++, symbols[state2]);
             final int numberOfBits1 = numbersOfBits[state2];
             state2 = (int) (newStates[state2] + peekBits(bitsConsumed, bits, numberOfBits1));
             bitsConsumed += numberOfBits1;
@@ -138,7 +137,7 @@ class FiniteStateEntropy {
             currentAddress = loader.getCurrentAddress();
 
             if (loader.isOverflow()) {
-                UNSAFE.putByte(outputBase, output++, symbols[state1]);
+                outputBase.put(output++, symbols[state1]);
                 break;
             }
         }

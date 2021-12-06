@@ -13,7 +13,6 @@
  */
 package com.epam.deltix.zstd;
 
-import static com.epam.deltix.zstd.UnsafeUtil.UNSAFE;
 import static com.epam.deltix.zstd.Util.highestBit;
 import static com.epam.deltix.zstd.Util.verify;
 
@@ -33,7 +32,7 @@ class FseTableReader {
         int symbolNumber = 0;
         boolean previousIsZero = false;
 
-        int bitStream = UNSAFE.getInt(inputBase, input);
+        int bitStream = inputBase.getInt(input);
 
         final int tableLog = (bitStream & 0xF) + FSE_MIN_TABLE_LOG;
 
@@ -53,7 +52,7 @@ class FseTableReader {
                     n0 += 24;
                     if (input < inputLimit - 5) {
                         input += 2;
-                        bitStream = (UNSAFE.getInt(inputBase, input) >>> bitCount);
+                        bitStream = (inputBase.getInt(input) >>> bitCount);
                     } else {
                         // end of bit stream
                         bitStream >>>= 16;
@@ -76,7 +75,7 @@ class FseTableReader {
                 if ((input <= inputLimit - 7) || (input + (bitCount >>> 3) <= inputLimit - 4)) {
                     input += bitCount >>> 3;
                     bitCount &= 7;
-                    bitStream = UNSAFE.getInt(inputBase, input) >>> bitCount;
+                    bitStream = inputBase.getInt(input) >>> bitCount;
                 } else {
                     bitStream >>>= 2;
                 }
@@ -112,7 +111,7 @@ class FseTableReader {
                 bitCount -= (int) (8 * (inputLimit - 4 - input));
                 input = inputLimit - 4;
             }
-            bitStream = UNSAFE.getInt(inputBase, input) >>> (bitCount & 31);
+            bitStream = inputBase.getInt(input) >>> (bitCount & 31);
         }
 
         verify(remaining == 1 && bitCount <= 32, input, "Input is corrupted");
