@@ -3,7 +3,8 @@ package com.epam.deltix.zstd;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+
+import static com.epam.deltix.zstd.ZstdFrameDecompressor.ByteBufferWrap;
 
 public class TestDecompress {
     @Test
@@ -12,15 +13,13 @@ public class TestDecompress {
                 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 97, 1,
                 0, 11, 26, 118, 62, -57, -8, 51, -92, 90};
 
-        final ByteBuffer compressedBuffer = ByteBuffer.wrap(compressedData);
-        compressedBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        final ByteBuffer compressedBuffer = ByteBufferWrap(compressedData);
 
         final int decompressSize = (int) ZstdDecompressor.getDecompressedSize(compressedBuffer, 0, compressedData.length);
 
         final byte[] decompressedData = new byte[decompressSize];
 
-        final ByteBuffer decompressedBuffer = ByteBuffer.wrap(decompressedData);
-        decompressedBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        final ByteBuffer decompressedBuffer = ByteBufferWrap(decompressedData);
 
         final ZstdDecompressor decompressor = new ZstdDecompressor();
         decompressor.decompress(

@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
 import static com.epam.deltix.zstd.BitStream.peekBits;
 import static com.epam.deltix.zstd.FseTableReader.FSE_MAX_SYMBOL_VALUE;
 import static com.epam.deltix.zstd.Util.verify;
+import static com.epam.deltix.zstd.ZstdFrameDecompressor.ByteBufferWrap;
 import static com.epam.deltix.zstd.ZstdFrameDecompressor.SIZE_OF_INT;
 
 class FiniteStateEntropy {
@@ -34,7 +35,7 @@ class FiniteStateEntropy {
         int input = inputAddress;
         input += reader.readFseTable(table, inputBase, input, inputLimit, FSE_MAX_SYMBOL_VALUE, MAX_TABLE_LOG);
 
-        final ByteBuffer outputBase = ByteBuffer.wrap(weights);
+        final ByteBuffer outputBase = ByteBufferWrap(weights);
         final int outputAddress = 0;
         final long outputLimit = outputAddress + weights.length;
 

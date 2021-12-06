@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import static com.epam.deltix.zstd.Preconditions.checkPositionIndexes;
+import static com.epam.deltix.zstd.ZstdFrameDecompressor.ByteBufferWrap;
 import static java.lang.Long.rotateLeft;
 import static java.lang.Math.min;
 
@@ -35,7 +36,7 @@ public final class XxHash64 {
     private final long seed;
 
     private static final int BUFFER_ADDRESS = 0;
-    private final ByteBuffer buffer = ByteBuffer.wrap(new byte[32]);
+    private final ByteBuffer buffer = ByteBufferWrap(new byte[32]);
     private int bufferSize;
 
     private long bodyLength;
@@ -63,7 +64,7 @@ public final class XxHash64 {
 
     public XxHash64 update(final byte[] data, final int offset, final int length) {
         checkPositionIndexes(offset, offset + length, data.length);
-        updateHash(ByteBuffer.wrap(data), offset, length);
+        updateHash(ByteBufferWrap(data), offset, length);
         return this;
     }
 

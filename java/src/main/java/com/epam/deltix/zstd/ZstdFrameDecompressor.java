@@ -14,6 +14,7 @@
 package com.epam.deltix.zstd;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import static com.epam.deltix.zstd.BitStream.peekBits;
@@ -96,6 +97,12 @@ class ZstdFrameDecompressor {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 7, 8, 9, 10, 11,
             12, 13, 14, 15, 16};
+
+    static ByteBuffer ByteBufferWrap(final byte[] array) {
+        final ByteBuffer byteBuffer = ByteBuffer.wrap(array);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        return byteBuffer;
+    }
 
     private static final FiniteStateEntropy.Table DEFAULT_LITERALS_LENGTH_TABLE = new FiniteStateEntropy.Table(
             6,
@@ -735,7 +742,7 @@ class ZstdFrameDecompressor {
             input += huffman.readTable(inputBase, input, compressedSize);
         }
 
-        literalsBase = ByteBuffer.wrap(literals);
+        literalsBase = ByteBufferWrap(literals);
         literalsAddress = 0;
         literalsLimit = uncompressedSize;
 
@@ -778,7 +785,7 @@ class ZstdFrameDecompressor {
         final byte value = inputBase.get(input++);
         Arrays.fill(literals, 0, outputSize + SIZE_OF_LONG, value);
 
-        literalsBase = ByteBuffer.wrap(literals);
+        literalsBase = ByteBufferWrap(literals);
         literalsAddress = 0;
         literalsLimit = outputSize;
 
@@ -817,7 +824,7 @@ class ZstdFrameDecompressor {
         // Set literals pointer to [input, literalSize], but only if we can copy 8 bytes at a time during sequence decoding
         // Otherwise, copy literals into buffer that's big enough to guarantee that
         if (literalSize > (inputLimit - input) - SIZE_OF_LONG) {
-            literalsBase = ByteBuffer.wrap(literals);
+            literalsBase = ByteBufferWrap(literals);
             literalsAddress = 0;
             literalsLimit = literalSize;
 
