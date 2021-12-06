@@ -14,7 +14,6 @@
 package com.epam.deltix.zstd;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import static com.epam.deltix.zstd.BitStream.peekBits;
@@ -155,9 +154,6 @@ class ZstdFrameDecompressor {
             final ByteBuffer outputBase,
             final int outputAddress,
             final int outputLimit) {
-        inputBase.order(ByteOrder.LITTLE_ENDIAN);
-        outputBase.order(ByteOrder.LITTLE_ENDIAN);
-
         if (outputAddress == outputLimit) {
             return 0;
         }

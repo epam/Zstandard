@@ -18,10 +18,11 @@ import java.nio.ByteBuffer;
 public class ZstdDecompressor {
     private final ZstdFrameDecompressor decompressor = new ZstdFrameDecompressor();
 
-    public int decompress(final byte[] input, final int inputOffset, final int inputLength, final byte[] output, final int outputOffset, final int maxOutputLength) {
+    public int decompress(final ByteBuffer input, final int inputOffset, final int inputLength,
+                          final ByteBuffer output, final int outputOffset, final int maxOutputLength) {
         return decompressor.decompress(
-                ByteBuffer.wrap(input), inputOffset, inputOffset + inputLength,
-                ByteBuffer.wrap(output), outputOffset, outputOffset + maxOutputLength);
+                input, inputOffset, inputOffset + inputLength,
+                output, outputOffset, outputOffset + maxOutputLength);
     }
 
 //    public void decompress(final ByteBuffer input, final ByteBuffer output)
@@ -70,7 +71,7 @@ public class ZstdDecompressor {
 //        }
 //    }
 
-    public static long getDecompressedSize(final byte[] input, final int offset, final int length) {
-        return ZstdFrameDecompressor.getDecompressedSize(ByteBuffer.wrap(input), offset, offset + length);
+    public static long getDecompressedSize(final ByteBuffer input, final int offset, final int length) {
+        return ZstdFrameDecompressor.getDecompressedSize(input, offset, offset + length);
     }
 }
