@@ -24,6 +24,7 @@ jobs:
           java/build/libs/
           java/build/test-results/test
           java/build/reports/tests/test
+
   build_csharp:
     name: Build C# ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -33,14 +34,22 @@ jobs:
         os: [ 'ubuntu-latest', 'windows-latest' ]
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-dotnet@v1.7.2
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1.8.1
       with:
-        dotnet-version: 2.1.607
-    - uses: cake-build/cake-action@v1.2.0
-      with:
-        script-path: csharp/build.cake
+        dotnet-version: '3.1.x'
+    - name: test windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        cd csharp
+        ./build.ps1 --target=Run-Unit-Tests
+    - name: test nix
+      if: ${{ matrix.os ~= 'windows-latest' }}
+      run: |
+        cd csharp
+        ./build.sh --target=Run-Unit-Tests
     - uses: actions/upload-artifact@v2
       with:
         name: build-csharp-${{ matrix.os }}
-        path: csharp/bin/Release/netstandard2.0/
+        path: csharp/bin/Release/netstandard3.1/
             java/build/reports/tests/test
