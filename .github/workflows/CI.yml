@@ -51,5 +51,5 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: build-csharp-${{ matrix.os }}
-        path: csharp/bin/Release/netstandard3.1/
+        path: csharp/bin/Release/netstandard2.0/
             java/build/reports/tests/test
