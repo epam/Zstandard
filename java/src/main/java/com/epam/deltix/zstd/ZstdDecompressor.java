@@ -13,65 +13,22 @@
  */
 package com.epam.deltix.zstd;
 
-import java.nio.ByteBuffer;
+import static com.epam.deltix.zstd.ZstdFrameDecompressor.ByteBufferWrap;
 
 public class ZstdDecompressor {
     private final ZstdFrameDecompressor decompressor = new ZstdFrameDecompressor();
 
-    public int decompress(final ByteBuffer input, final int inputOffset, final int inputLength,
-                          final ByteBuffer output, final int outputOffset, final int maxOutputLength) {
+
+    public int decompress(final byte[] input, final int inputOffset, final int inputLength,
+                          final byte[] output, final int outputOffset, final int maxOutputLength) {
+
+        // Hide ByteBuffer interface because it must be forced to LITTLE_ENDIAN
         return decompressor.decompress(
-                input, inputOffset, inputOffset + inputLength,
-                output, outputOffset, outputOffset + maxOutputLength);
+                ByteBufferWrap(input), inputOffset, inputOffset + inputLength,
+                ByteBufferWrap(output), outputOffset, outputOffset + maxOutputLength);
     }
 
-//    public void decompress(final ByteBuffer input, final ByteBuffer output)
-//            throws RuntimeException {
-//        final Object inputBase;
-//        final long inputAddress;
-//        final long inputLimit;
-//        if (input.isDirect()) {
-//            inputBase = null;
-//            final long address = getAddress(input);
-//            inputAddress = address + input.position();
-//            inputLimit = address + input.limit();
-//        } else if (input.hasArray()) {
-//            inputBase = input.array();
-//            inputAddress = input.arrayOffset() + input.position();
-//            inputLimit = input.arrayOffset() + input.limit();
-//        } else {
-//            throw new IllegalArgumentException("Unsupported input ByteBuffer implementation " + input.getClass().getName());
-//        }
-//
-//        final Object outputBase;
-//        final long outputAddress;
-//        final long outputLimit;
-//        if (output.isDirect()) {
-//            outputBase = null;
-//            final long address = getAddress(output);
-//            outputAddress = address + output.position();
-//            outputLimit = address + output.limit();
-//        } else if (output.hasArray()) {
-//            outputBase = output.array();
-//            outputAddress = output.arrayOffset() + output.position();
-//            outputLimit = output.arrayOffset() + output.limit();
-//        } else {
-//            throw new IllegalArgumentException("Unsupported output ByteBuffer implementation " + output.getClass().getName());
-//        }
-//
-//        // HACK: Assure JVM does not collect Slice wrappers while decompressing, since the
-//        // collection may trigger freeing of the underlying memory resulting in a segfault
-//        // There is no other known way to signal to the JVM that an object should not be
-//        // collected in a block, and technically, the JVM is allowed to eliminate these locks.
-//        synchronized (input) {
-//            synchronized (output) {
-//                final int written = new ZstdFrameDecompressor().decompress(inputBase, inputAddress, inputLimit, outputBase, outputAddress, outputLimit);
-//                output.position(output.position() + written);
-//            }
-//        }
-//    }
-
-    public static long getDecompressedSize(final ByteBuffer input, final int offset, final int length) {
-        return ZstdFrameDecompressor.getDecompressedSize(input, offset, offset + length);
+    public static long getDecompressedSize(final byte[] input, final int offset, final int length) {
+        return ZstdFrameDecompressor.getDecompressedSize(ByteBufferWrap(input), offset, offset + length);
     }
 }
