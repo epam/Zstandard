@@ -44,7 +44,7 @@ jobs:
         cd csharp
         ./build.ps1 --target=Run-Unit-Tests
     - name: test nix
-      if: ${{ matrix.os ~= 'windows-latest' }}
+      if: ${{ matrix.os != 'windows-latest' }}
       run: |
         cd csharp
         ./build.sh --target=Run-Unit-Tests
