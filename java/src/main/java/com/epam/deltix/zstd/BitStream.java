@@ -13,7 +13,8 @@
  */
 package com.epam.deltix.zstd;
 
-import static com.epam.deltix.zstd.UnsafeUtil.UNSAFE;
+import java.nio.ByteBuffer;
+
 import static com.epam.deltix.zstd.Util.highestBit;
 import static com.epam.deltix.zstd.Util.verify;
 import static com.epam.deltix.zstd.ZstdFrameDecompressor.SIZE_OF_LONG;
@@ -29,26 +30,26 @@ class BitStream {
     private BitStream() {
     }
 
-    public static boolean isEndOfStream(long startAddress, long currentAddress, int bitsConsumed) {
+    public static boolean isEndOfStream(final long startAddress, final long currentAddress, final int bitsConsumed) {
         return startAddress == currentAddress && bitsConsumed == Long.SIZE;
     }
 
-    static long readTail(Object inputBase, long inputAddress, int inputSize) {
-        long bits = UNSAFE.getByte(inputBase, inputAddress) & 0xFF;
+    static long readTail(final ByteBuffer inputBase, final int inputAddress, final int inputSize) {
+        long bits = inputBase.get(inputAddress) & 0xFF;
 
         switch (inputSize) {
             case 7:
-                bits |= (UNSAFE.getByte(inputBase, inputAddress + 6) & 0xFFL) << 48;
+                bits |= (inputBase.get(inputAddress + 6) & 0xFFL) << 48;
             case 6:
-                bits |= (UNSAFE.getByte(inputBase, inputAddress + 5) & 0xFFL) << 40;
+                bits |= (inputBase.get(inputAddress + 5) & 0xFFL) << 40;
             case 5:
-                bits |= (UNSAFE.getByte(inputBase, inputAddress + 4) & 0xFFL) << 32;
+                bits |= (inputBase.get(inputAddress + 4) & 0xFFL) << 32;
             case 4:
-                bits |= (UNSAFE.getByte(inputBase, inputAddress + 3) & 0xFFL) << 24;
+                bits |= (inputBase.get(inputAddress + 3) & 0xFFL) << 24;
             case 3:
-                bits |= (UNSAFE.getByte(inputBase, inputAddress + 2) & 0xFFL) << 16;
+                bits |= (inputBase.get(inputAddress + 2) & 0xFFL) << 16;
             case 2:
-                bits |= (UNSAFE.getByte(inputBase, inputAddress + 1) & 0xFFL) << 8;
+                bits |= (inputBase.get(inputAddress + 1) & 0xFFL) << 8;
         }
 
         return bits;
@@ -57,7 +58,7 @@ class BitStream {
     /**
      * @return numberOfBits in the low order bits of a long
      */
-    public static long peekBits(int bitsConsumed, long bitContainer, int numberOfBits) {
+    public static long peekBits(final int bitsConsumed, final long bitContainer, final int numberOfBits) {
         return (((bitContainer << bitsConsumed) >>> 1) >>> (63 - numberOfBits));
     }
 
@@ -66,19 +67,19 @@ class BitStream {
      *
      * @return numberOfBits in the low order bits of a long
      */
-    public static long peekBitsFast(int bitsConsumed, long bitContainer, int numberOfBits) {
+    public static long peekBitsFast(final int bitsConsumed, final long bitContainer, final int numberOfBits) {
         return ((bitContainer << bitsConsumed) >>> (64 - numberOfBits));
     }
 
     static class Initializer {
-        private final Object inputBase;
-        private final long startAddress;
-        private final long endAddress;
+        private final ByteBuffer inputBase;
+        private final int startAddress;
+        private final int endAddress;
         private long bits;
-        private long currentAddress;
+        private int currentAddress;
         private int bitsConsumed;
 
-        public Initializer(Object inputBase, long startAddress, long endAddress) {
+        public Initializer(final ByteBuffer inputBase, final int startAddress, final int endAddress) {
             this.inputBase = inputBase;
             this.startAddress = startAddress;
             this.endAddress = endAddress;
@@ -88,7 +89,7 @@ class BitStream {
             return bits;
         }
 
-        public long getCurrentAddress() {
+        public int getCurrentAddress() {
             return currentAddress;
         }
 
@@ -99,15 +100,15 @@ class BitStream {
         public void initialize() {
             verify(endAddress - startAddress >= 1, startAddress, "Bitstream is empty");
 
-            int lastByte = UNSAFE.getByte(inputBase, endAddress - 1) & 0xFF;
+            final int lastByte = inputBase.get(endAddress - 1) & 0xFF;
             verify(lastByte != 0, endAddress, "Bitstream end mark not present");
 
             bitsConsumed = SIZE_OF_LONG - highestBit(lastByte);
 
-            int inputSize = (int) (endAddress - startAddress);
+            final int inputSize = (int) (endAddress - startAddress);
             if (inputSize >= SIZE_OF_LONG) {  /* normal case */
                 currentAddress = endAddress - SIZE_OF_LONG;
-                bits = UNSAFE.getLong(inputBase, currentAddress);
+                bits = inputBase.getLong(currentAddress);
             } else {
                 currentAddress = startAddress;
                 bits = readTail(inputBase, startAddress, inputSize);
@@ -118,14 +119,14 @@ class BitStream {
     }
 
     static final class Loader {
-        private final Object inputBase;
-        private final long startAddress;
+        private final ByteBuffer inputBase;
+        private final int startAddress;
         private long bits;
-        private long currentAddress;
+        private int currentAddress;
         private int bitsConsumed;
         private boolean overflow;
 
-        public Loader(Object inputBase, long startAddress, long currentAddress, long bits, int bitsConsumed) {
+        public Loader(final ByteBuffer inputBase, final int startAddress, final int currentAddress, final long bits, final int bitsConsumed) {
             this.inputBase = inputBase;
             this.startAddress = startAddress;
             this.bits = bits;
@@ -137,7 +138,7 @@ class BitStream {
             return bits;
         }
 
-        public long getCurrentAddress() {
+        public int getCurrentAddress() {
             return currentAddress;
         }
 
@@ -161,19 +162,19 @@ class BitStream {
             if (currentAddress >= startAddress + SIZE_OF_LONG) {
                 if (bytes > 0) {
                     currentAddress -= bytes;
-                    bits = UNSAFE.getLong(inputBase, currentAddress);
+                    bits = inputBase.getLong(currentAddress);
                 }
                 bitsConsumed &= 0b111;
             } else if (currentAddress - bytes < startAddress) {
                 bytes = (int) (currentAddress - startAddress);
                 currentAddress = startAddress;
                 bitsConsumed -= bytes * SIZE_OF_LONG;
-                bits = UNSAFE.getLong(inputBase, startAddress);
+                bits = inputBase.getLong(startAddress);
                 return true;
             } else {
                 currentAddress -= bytes;
                 bitsConsumed -= bytes * SIZE_OF_LONG;
-                bits = UNSAFE.getLong(inputBase, currentAddress);
+                bits = inputBase.getLong(currentAddress);
             }
 
             return false;

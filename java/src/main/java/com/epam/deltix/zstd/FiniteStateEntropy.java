@@ -13,12 +13,13 @@
  */
 package com.epam.deltix.zstd;
 
+import java.nio.ByteBuffer;
+
 import static com.epam.deltix.zstd.BitStream.peekBits;
 import static com.epam.deltix.zstd.FseTableReader.FSE_MAX_SYMBOL_VALUE;
-import static com.epam.deltix.zstd.UnsafeUtil.UNSAFE;
 import static com.epam.deltix.zstd.Util.verify;
+import static com.epam.deltix.zstd.ZstdFrameDecompressor.ByteBufferWrap;
 import static com.epam.deltix.zstd.ZstdFrameDecompressor.SIZE_OF_INT;
-import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
 
 class FiniteStateEntropy {
     private static final int MAX_TABLE_LOG = 12;
@@ -26,25 +27,25 @@ class FiniteStateEntropy {
     private final FiniteStateEntropy.Table table;
     private final FseTableReader reader = new FseTableReader();
 
-    public FiniteStateEntropy(int maxLog) {
+    public FiniteStateEntropy(final int maxLog) {
         table = new FiniteStateEntropy.Table(maxLog);
     }
 
-    public int decompress(final Object inputBase, final long inputAddress, final long inputLimit, byte[] weights) {
-        long input = inputAddress;
+    public int decompress(final ByteBuffer inputBase, final int inputAddress, final int inputLimit, final byte[] weights) {
+        int input = inputAddress;
         input += reader.readFseTable(table, inputBase, input, inputLimit, FSE_MAX_SYMBOL_VALUE, MAX_TABLE_LOG);
 
-        final Object outputBase = weights;
-        final long outputAddress = ARRAY_BYTE_BASE_OFFSET;
+        final ByteBuffer outputBase = ByteBufferWrap(weights);
+        final int outputAddress = 0;
         final long outputLimit = outputAddress + weights.length;
 
-        long output = outputAddress;
+        int output = outputAddress;
 
         // initialize bit stream
-        BitStream.Initializer initializer = new BitStream.Initializer(inputBase, input, inputLimit);
+        final BitStream.Initializer initializer = new BitStream.Initializer(inputBase, input, inputLimit);
         initializer.initialize();
         int bitsConsumed = initializer.getBitsConsumed();
-        long currentAddress = initializer.getCurrentAddress();
+        int currentAddress = initializer.getCurrentAddress();
         long bits = initializer.getBits();
 
         // initialize first FSE stream
@@ -67,30 +68,30 @@ class FiniteStateEntropy {
         bitsConsumed = loader.getBitsConsumed();
         currentAddress = loader.getCurrentAddress();
 
-        byte[] symbols = table.symbol;
-        byte[] numbersOfBits = table.numberOfBits;
-        int[] newStates = table.newState;
+        final byte[] symbols = table.symbol;
+        final byte[] numbersOfBits = table.numberOfBits;
+        final int[] newStates = table.newState;
 
         // decode 4 symbols per loop
         while (output <= outputLimit - 4) {
             int numberOfBits;
 
-            UNSAFE.putByte(outputBase, output, symbols[state1]);
+            outputBase.put(output, symbols[state1]);
             numberOfBits = numbersOfBits[state1];
             state1 = (int) (newStates[state1] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
 
-            UNSAFE.putByte(outputBase, output + 1, symbols[state2]);
+            outputBase.put(output + 1, symbols[state2]);
             numberOfBits = numbersOfBits[state2];
             state2 = (int) (newStates[state2] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
 
-            UNSAFE.putByte(outputBase, output + 2, symbols[state1]);
+            outputBase.put(output + 2, symbols[state1]);
             numberOfBits = numbersOfBits[state1];
             state1 = (int) (newStates[state1] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
 
-            UNSAFE.putByte(outputBase, output + 3, symbols[state2]);
+            outputBase.put(output + 3, symbols[state2]);
             numberOfBits = numbersOfBits[state2];
             state2 = (int) (newStates[state2] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
@@ -98,7 +99,7 @@ class FiniteStateEntropy {
             output += SIZE_OF_INT;
 
             loader = new BitStream.Loader(inputBase, input, currentAddress, bits, bitsConsumed);
-            boolean done = loader.load();
+            final boolean done = loader.load();
             bitsConsumed = loader.getBitsConsumed();
             bits = loader.getBits();
             currentAddress = loader.getCurrentAddress();
@@ -109,8 +110,8 @@ class FiniteStateEntropy {
 
         while (true) {
             verify(output <= outputLimit - 2, input, "Output buffer is too small");
-            UNSAFE.putByte(outputBase, output++, symbols[state1]);
-            int numberOfBits = numbersOfBits[state1];
+            outputBase.put(output++, symbols[state1]);
+            final int numberOfBits = numbersOfBits[state1];
             state1 = (int) (newStates[state1] + peekBits(bitsConsumed, bits, numberOfBits));
             bitsConsumed += numberOfBits;
 
@@ -121,13 +122,13 @@ class FiniteStateEntropy {
             currentAddress = loader.getCurrentAddress();
 
             if (loader.isOverflow()) {
-                UNSAFE.putByte(outputBase, output++, symbols[state2]);
+                outputBase.put(output++, symbols[state2]);
                 break;
             }
 
             verify(output <= outputLimit - 2, input, "Output buffer is too small");
-            UNSAFE.putByte(outputBase, output++, symbols[state2]);
-            int numberOfBits1 = numbersOfBits[state2];
+            outputBase.put(output++, symbols[state2]);
+            final int numberOfBits1 = numbersOfBits[state2];
             state2 = (int) (newStates[state2] + peekBits(bitsConsumed, bits, numberOfBits1));
             bitsConsumed += numberOfBits1;
 
@@ -138,7 +139,7 @@ class FiniteStateEntropy {
             currentAddress = loader.getCurrentAddress();
 
             if (loader.isOverflow()) {
-                UNSAFE.putByte(outputBase, output++, symbols[state1]);
+                outputBase.put(output++, symbols[state1]);
                 break;
             }
         }
@@ -152,15 +153,15 @@ class FiniteStateEntropy {
         final byte[] symbol;
         final byte[] numberOfBits;
 
-        public Table(int log2Size) {
-            int size = 1 << log2Size;
+        public Table(final int log2Size) {
+            final int size = 1 << log2Size;
             newState = new int[size];
             symbol = new byte[size];
             numberOfBits = new byte[size];
         }
 
-        public Table(int log2Size, int[] newState, byte[] symbol, byte[] numberOfBits) {
-            int size = 1 << log2Size;
+        public Table(final int log2Size, final int[] newState, final byte[] symbol, final byte[] numberOfBits) {
+            final int size = 1 << log2Size;
             if (newState.length != size || symbol.length != size || numberOfBits.length != size) {
                 throw new IllegalArgumentException("Expected arrays to match provided size");
             }
