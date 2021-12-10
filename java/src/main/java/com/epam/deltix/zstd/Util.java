@@ -38,4 +38,58 @@ class Util {
     public static RuntimeException fail(final long offset, final String reason) {
         throw new RuntimeException(reason + ": offset=" + offset);
     }
+
+    public static long getLong(final byte[] data, final int offset) {
+        return (data[offset] & 0xffL)
+                | ((data[offset + 1] & 0xffL) << 8)
+                | ((data[offset + 2] & 0xffL) << 16)
+                | ((data[offset + 3] & 0xffL) << 24)
+                | ((data[offset + 4] & 0xffL) << 32)
+                | ((data[offset + 5] & 0xffL) << 40)
+                | ((data[offset + 6] & 0xffL) << 48)
+                | ((data[offset + 7] & 0xffL) << 56);
+    }
+
+    public static int getInt(final byte[] data, final int offset) {
+        return (data[offset] & 0xff)
+                | ((data[offset + 1] & 0xff) << 8)
+                | ((data[offset + 2] & 0xff) << 16)
+                | ((data[offset + 3] & 0xff) << 24);
+    }
+
+    public static short getShort(final byte[] data, final int offset) {
+        return (short) ((data[offset] & 0xff)
+                | ((data[offset + 1] & 0xff) << 8));
+    }
+
+    public static byte getByte(final byte[] data, final int offset) {
+        return data[offset];
+    }
+
+    public static void putLong(final byte[] data, final int offset, final long value) {
+        data[offset] = (byte) (value & 0xffL);
+        data[offset + 1] = (byte) ((value >>> 8) & 0xffL);
+        data[offset + 2] = (byte) ((value >>> 16) & 0xffL);
+        data[offset + 3] = (byte) ((value >>> 24) & 0xffL);
+        data[offset + 4] = (byte) ((value >>> 32) & 0xffL);
+        data[offset + 5] = (byte) ((value >>> 40) & 0xffL);
+        data[offset + 6] = (byte) ((value >>> 48) & 0xffL);
+        data[offset + 7] = (byte) ((value >>> 56) & 0xffL);
+    }
+
+    public static void putInt(final byte[] data, final int offset, final int value) {
+        data[offset] = (byte) value;
+        data[offset + 1] = (byte) (value >> 8);
+        data[offset + 2] = (byte) (value >> 16);
+        data[offset + 3] = (byte) (value >> 24);
+    }
+
+    public static void putShort(final byte[] data, final int offset, final short value) {
+        data[offset] = (byte) value;
+        data[offset + 1] = (byte) (value >> 8);
+    }
+
+    public static void putByte(final byte[] data, final int offset, final byte value) {
+        data[offset] = value;
+    }
 }
