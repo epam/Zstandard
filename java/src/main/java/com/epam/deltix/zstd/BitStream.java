@@ -13,10 +13,7 @@
  */
 package com.epam.deltix.zstd;
 
-import java.nio.ByteBuffer;
-
-import static com.epam.deltix.zstd.Util.highestBit;
-import static com.epam.deltix.zstd.Util.verify;
+import static com.epam.deltix.zstd.Util.*;
 import static com.epam.deltix.zstd.ZstdFrameDecompressor.SIZE_OF_LONG;
 
 /**
@@ -34,22 +31,22 @@ class BitStream {
         return startAddress == currentAddress && bitsConsumed == Long.SIZE;
     }
 
-    static long readTail(final ByteBuffer inputBase, final int inputAddress, final int inputSize) {
-        long bits = inputBase.get(inputAddress) & 0xFF;
+    static long readTail(final byte[] inputBase, final int inputAddress, final int inputSize) {
+        long bits = getByte(inputBase, inputAddress) & 0xFF;
 
         switch (inputSize) {
             case 7:
-                bits |= (inputBase.get(inputAddress + 6) & 0xFFL) << 48;
+                bits |= (getByte(inputBase, inputAddress + 6) & 0xFFL) << 48;
             case 6:
-                bits |= (inputBase.get(inputAddress + 5) & 0xFFL) << 40;
+                bits |= (getByte(inputBase, inputAddress + 5) & 0xFFL) << 40;
             case 5:
-                bits |= (inputBase.get(inputAddress + 4) & 0xFFL) << 32;
+                bits |= (getByte(inputBase, inputAddress + 4) & 0xFFL) << 32;
             case 4:
-                bits |= (inputBase.get(inputAddress + 3) & 0xFFL) << 24;
+                bits |= (getByte(inputBase, inputAddress + 3) & 0xFFL) << 24;
             case 3:
-                bits |= (inputBase.get(inputAddress + 2) & 0xFFL) << 16;
+                bits |= (getByte(inputBase, inputAddress + 2) & 0xFFL) << 16;
             case 2:
-                bits |= (inputBase.get(inputAddress + 1) & 0xFFL) << 8;
+                bits |= (getByte(inputBase, inputAddress + 1) & 0xFFL) << 8;
         }
 
         return bits;
@@ -72,14 +69,14 @@ class BitStream {
     }
 
     static class Initializer {
-        private final ByteBuffer inputBase;
+        private final byte[] inputBase;
         private final int startAddress;
         private final int endAddress;
         private long bits;
         private int currentAddress;
         private int bitsConsumed;
 
-        public Initializer(final ByteBuffer inputBase, final int startAddress, final int endAddress) {
+        public Initializer(final byte[] inputBase, final int startAddress, final int endAddress) {
             this.inputBase = inputBase;
             this.startAddress = startAddress;
             this.endAddress = endAddress;
@@ -100,7 +97,7 @@ class BitStream {
         public void initialize() {
             verify(endAddress - startAddress >= 1, startAddress, "Bitstream is empty");
 
-            final int lastByte = inputBase.get(endAddress - 1) & 0xFF;
+            final int lastByte = getByte(inputBase, endAddress - 1) & 0xFF;
             verify(lastByte != 0, endAddress, "Bitstream end mark not present");
 
             bitsConsumed = SIZE_OF_LONG - highestBit(lastByte);
@@ -108,7 +105,7 @@ class BitStream {
             final int inputSize = (int) (endAddress - startAddress);
             if (inputSize >= SIZE_OF_LONG) {  /* normal case */
                 currentAddress = endAddress - SIZE_OF_LONG;
-                bits = inputBase.getLong(currentAddress);
+                bits = getLong(inputBase, currentAddress);
             } else {
                 currentAddress = startAddress;
                 bits = readTail(inputBase, startAddress, inputSize);
@@ -119,14 +116,14 @@ class BitStream {
     }
 
     static final class Loader {
-        private final ByteBuffer inputBase;
+        private final byte[] inputBase;
         private final int startAddress;
         private long bits;
         private int currentAddress;
         private int bitsConsumed;
         private boolean overflow;
 
-        public Loader(final ByteBuffer inputBase, final int startAddress, final int currentAddress, final long bits, final int bitsConsumed) {
+        public Loader(final byte[] inputBase, final int startAddress, final int currentAddress, final long bits, final int bitsConsumed) {
             this.inputBase = inputBase;
             this.startAddress = startAddress;
             this.bits = bits;
@@ -162,19 +159,19 @@ class BitStream {
             if (currentAddress >= startAddress + SIZE_OF_LONG) {
                 if (bytes > 0) {
                     currentAddress -= bytes;
-                    bits = inputBase.getLong(currentAddress);
+                    bits = getLong(inputBase, currentAddress);
                 }
                 bitsConsumed &= 0b111;
             } else if (currentAddress - bytes < startAddress) {
                 bytes = (int) (currentAddress - startAddress);
                 currentAddress = startAddress;
                 bitsConsumed -= bytes * SIZE_OF_LONG;
-                bits = inputBase.getLong(startAddress);
+                bits = getLong(inputBase, startAddress);
                 return true;
             } else {
                 currentAddress -= bytes;
                 bitsConsumed -= bytes * SIZE_OF_LONG;
-                bits = inputBase.getLong(currentAddress);
+                bits = getLong(inputBase, currentAddress);
             }
 
             return false;

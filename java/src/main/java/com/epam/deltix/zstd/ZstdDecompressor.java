@@ -13,8 +13,6 @@
  */
 package com.epam.deltix.zstd;
 
-import static com.epam.deltix.zstd.ZstdFrameDecompressor.ByteBufferWrap;
-
 public class ZstdDecompressor {
     private final ZstdFrameDecompressor decompressor = new ZstdFrameDecompressor();
 
@@ -22,13 +20,12 @@ public class ZstdDecompressor {
     public int decompress(final byte[] input, final int inputOffset, final int inputLength,
                           final byte[] output, final int outputOffset, final int maxOutputLength) {
 
-        // Hide ByteBuffer interface because it must be forced to LITTLE_ENDIAN
         return decompressor.decompress(
-                ByteBufferWrap(input), inputOffset, inputOffset + inputLength,
-                ByteBufferWrap(output), outputOffset, outputOffset + maxOutputLength);
+                input, inputOffset, inputOffset + inputLength,
+                output, outputOffset, outputOffset + maxOutputLength);
     }
 
     public static long getDecompressedSize(final byte[] input, final int offset, final int length) {
-        return ZstdFrameDecompressor.getDecompressedSize(ByteBufferWrap(input), offset, offset + length);
+        return ZstdFrameDecompressor.getDecompressedSize(input, offset, offset + length);
     }
 }

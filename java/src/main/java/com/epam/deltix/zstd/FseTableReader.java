@@ -13,10 +13,7 @@
  */
 package com.epam.deltix.zstd;
 
-import java.nio.ByteBuffer;
-
-import static com.epam.deltix.zstd.Util.highestBit;
-import static com.epam.deltix.zstd.Util.verify;
+import static com.epam.deltix.zstd.Util.*;
 
 class FseTableReader {
     private static final int FSE_MIN_TABLE_LOG = 5;
@@ -25,7 +22,7 @@ class FseTableReader {
     private final short[] nextSymbol = new short[FSE_MAX_SYMBOL_VALUE + 1];
     private final short[] normalizedCounters = new short[FSE_MAX_SYMBOL_VALUE + 1];
 
-    public int readFseTable(final FiniteStateEntropy.Table table, final ByteBuffer inputBase, final int inputAddress, final int inputLimit, int maxSymbol, final int maxTableLog) {
+    public int readFseTable(final FiniteStateEntropy.Table table, final byte[] inputBase, final int inputAddress, final int inputLimit, int maxSymbol, final int maxTableLog) {
         // read table headers
         int input = inputAddress;
         verify(inputLimit - inputAddress >= 4, input, "Not enough input bytes");
@@ -34,7 +31,7 @@ class FseTableReader {
         int symbolNumber = 0;
         boolean previousIsZero = false;
 
-        int bitStream = inputBase.getInt(input);
+        int bitStream = getInt(inputBase, input);
 
         final int tableLog = (bitStream & 0xF) + FSE_MIN_TABLE_LOG;
 
@@ -54,7 +51,7 @@ class FseTableReader {
                     n0 += 24;
                     if (input < inputLimit - 5) {
                         input += 2;
-                        bitStream = (inputBase.getInt(input) >>> bitCount);
+                        bitStream = (getInt(inputBase, input) >>> bitCount);
                     } else {
                         // end of bit stream
                         bitStream >>>= 16;
@@ -77,7 +74,7 @@ class FseTableReader {
                 if ((input <= inputLimit - 7) || (input + (bitCount >>> 3) <= inputLimit - 4)) {
                     input += bitCount >>> 3;
                     bitCount &= 7;
-                    bitStream = inputBase.getInt(input) >>> bitCount;
+                    bitStream = getInt(inputBase, input) >>> bitCount;
                 } else {
                     bitStream >>>= 2;
                 }
@@ -113,7 +110,7 @@ class FseTableReader {
                 bitCount -= (int) (8 * (inputLimit - 4 - input));
                 input = inputLimit - 4;
             }
-            bitStream = inputBase.getInt(input) >>> (bitCount & 31);
+            bitStream = getInt(inputBase, input) >>> (bitCount & 31);
         }
 
         verify(remaining == 1 && bitCount <= 32, input, "Input is corrupted");
